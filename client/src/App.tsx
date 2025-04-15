@@ -35,7 +35,6 @@ function App() {
         <Router />
       </main>
       <Footer />
-      <Toaster />
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,6 +10,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { insertUserSchema } from "@shared/schema";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 const loginSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
@@ -30,7 +32,69 @@ type RegisterValues = z.infer<typeof registerSchema>;
 
 export default function AuthPage() {
   const [, setLocation] = useLocation();
-  const { user, loginMutation, registerMutation } = useAuth();
+  const { toast } = useToast();
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
+  
+  // Try to get auth context, but provide fallbacks if it's not available
+  let user = null;
+  let loginFn = async (values: LoginValues) => {
+    setIsLoggingIn(true);
+    try {
+      const response = await apiRequest("POST", "/api/login", values);
+      const userData = await response.json();
+      toast({
+        title: "Login successful",
+        description: `Welcome back, ${userData.name || userData.username}!`,
+      });
+      setLocation("/");
+    } catch (error) {
+      toast({
+        title: "Login failed",
+        description: error instanceof Error ? error.message : "Invalid username or password",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+  
+  let registerFn = async (values: RegisterValues) => {
+    setIsRegistering(true);
+    try {
+      const { confirmPassword, ...userData } = values;
+      const response = await apiRequest("POST", "/api/register", userData);
+      const newUser = await response.json();
+      toast({
+        title: "Registration successful",
+        description: `Welcome to Vanished, ${newUser.name || newUser.username}!`,
+      });
+      setLocation("/");
+    } catch (error) {
+      toast({
+        title: "Registration failed",
+        description: error instanceof Error ? error.message : "Failed to create account",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRegistering(false);
+    }
+  };
+  
+  // Try to use the auth context when available
+  try {
+    const auth = useAuth();
+    user = auth.user;
+    loginFn = async (values: LoginValues) => {
+      auth.loginMutation.mutate(values);
+    };
+    registerFn = async (values: RegisterValues) => {
+      const { confirmPassword, ...userData } = values;
+      auth.registerMutation.mutate(userData);
+    };
+  } catch (error) {
+    console.warn("Auth context not available in AuthPage, using fallback authentication:", error);
+  }
   
   const loginForm = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
@@ -52,12 +116,11 @@ export default function AuthPage() {
   });
 
   const onLoginSubmit = (values: LoginValues) => {
-    loginMutation.mutate(values);
+    loginFn(values);
   };
 
   const onRegisterSubmit = (values: RegisterValues) => {
-    const { confirmPassword, ...userData } = values;
-    registerMutation.mutate(userData);
+    registerFn(values);
   };
 
   // Redirect to home page if the user is logged in
@@ -115,9 +178,9 @@ export default function AuthPage() {
                     <Button 
                       type="submit" 
                       className="w-full bg-orange-500 hover:bg-orange-600 text-white"
-                      disabled={loginMutation.isPending}
+                      disabled={isLoggingIn}
                     >
-                      {loginMutation.isPending ? "Entrando..." : "Entrar"}
+                      {isLoggingIn ? "Entrando..." : "Entrar"}
                     </Button>
                   </form>
                 </Form>
@@ -193,9 +256,9 @@ export default function AuthPage() {
                     <Button 
                       type="submit" 
                       className="w-full bg-orange-500 hover:bg-orange-600 text-white"
-                      disabled={registerMutation.isPending}
+                      disabled={isRegistering}
                     >
-                      {registerMutation.isPending ? "Criando conta..." : "Criar conta"}
+                      {isRegistering ? "Criando conta..." : "Criar conta"}
                     </Button>
                   </form>
                 </Form>
