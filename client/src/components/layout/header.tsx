@@ -42,9 +42,9 @@ export default function Header() {
           <Link href="/register-missing" className="text-white hover:text-orange-500 transition duration-200">
             Cadastrar pessoas
           </Link>
-          <a href="#" className="text-white hover:text-orange-500 transition duration-200">
+          <Link href="/about" className="text-white hover:text-orange-500 transition duration-200">
             Sobre nós
-          </a>
+          </Link>
           {user ? (
             <div className="flex items-center space-x-4">
               <span className="text-gray-300">Olá, {user.name || user.username}</span>
@@ -95,13 +95,13 @@ export default function Header() {
             >
               Cadastrar pessoas
             </Link>
-            <a
-              href="#"
+            <Link
+              href="/about"
               className="text-white hover:text-orange-500 transition duration-200 py-2"
               onClick={() => setMobileMenuOpen(false)}
             >
               Sobre nós
-            </a>
+            </Link>
             {user ? (
               <>
                 <span className="text-gray-300 py-2">Olá, {user.name || user.username}</span>

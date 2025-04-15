@@ -8,6 +8,7 @@ import AuthPage from "@/pages/auth-page";
 import SearchPage from "@/pages/search-page";
 import RegisterMissingPage from "@/pages/register-missing-page";
 import MissingDetailPage from "@/pages/missing-detail-page";
+import AboutPage from "@/pages/about-page";
 import { ProtectedRoute } from "./lib/protected-route";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
@@ -18,6 +19,7 @@ function Router() {
       <Route path="/" component={HomePage} />
       <Route path="/auth" component={AuthPage} />
       <Route path="/search" component={SearchPage} />
+      <Route path="/about" component={AboutPage} />
       <ProtectedRoute path="/register-missing" component={RegisterMissingPage} />
       <Route path="/missing/:id">
         {(params) => <MissingDetailPage id={parseInt(params.id)} />}
