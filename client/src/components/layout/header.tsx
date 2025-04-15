@@ -8,23 +8,27 @@ export default function Header() {
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   let user = null;
-  let logoutMutation = { mutate: () => console.log("Logout not available") };
-
+  
+  // For logout functionality
+  const handleLogout = () => {
+    try {
+      const { logoutMutation } = useAuth();
+      logoutMutation.mutate();
+    } catch (error) {
+      console.warn("Auth not available for logout:", error);
+    }
+  };
+  
+  // Try to get user data if available
   try {
-    // Try to use the auth context, but don't crash if it's not available
     const auth = useAuth();
     user = auth.user;
-    logoutMutation = auth.logoutMutation;
   } catch (error) {
-    console.warn("Auth context not available in header:", error);
+    console.warn("Auth context not available for user data:", error);
   }
-
+  
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
-  };
-
-  const handleLogout = () => {
-    logoutMutation.mutate();
   };
 
   return (

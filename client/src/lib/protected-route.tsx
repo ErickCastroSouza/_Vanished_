@@ -15,7 +15,7 @@ export function ProtectedRoute({
 
   return (
     <Route path={path}>
-      {({ params }) => {
+      {() => {
         if (isLoading) {
           return (
             <div className="flex items-center justify-center min-h-screen">
