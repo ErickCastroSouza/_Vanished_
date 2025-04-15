@@ -1,11 +1,14 @@
 import { 
   User, MissingPerson, InsertUser, SuccessStory, 
-  InsertMissingPerson, InsertSuccessStory, SearchMissingPersonParams 
+  InsertMissingPerson, InsertSuccessStory, SearchMissingPersonParams,
+  users, missingPersons, successStories
 } from "@shared/schema";
 import session from "express-session";
-import createMemoryStore from "memorystore";
+import connectPg from "connect-pg-simple";
+import { db, pool } from './db';
+import { eq, like, and, gte, lt } from "drizzle-orm";
 
-const MemoryStore = createMemoryStore(session);
+const PostgresSessionStore = connectPg(session);
 
 interface Statistics {
   totalMissingPersons: number;
@@ -32,168 +35,162 @@ export interface IStorage {
   sessionStore: session.SessionStore;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private missingPersons: Map<number, MissingPerson>;
-  private successStories: Map<number, SuccessStory>;
-  private userCurrentId: number;
-  private personCurrentId: number;
-  private storyCurrentId: number;
+export class DatabaseStorage implements IStorage {
   sessionStore: session.SessionStore;
 
   constructor() {
-    this.users = new Map();
-    this.missingPersons = new Map();
-    this.successStories = new Map();
-    this.userCurrentId = 1;
-    this.personCurrentId = 1;
-    this.storyCurrentId = 1;
-    this.sessionStore = new MemoryStore({
-      checkPeriod: 86400000, // 24 hours
+    this.sessionStore = new PostgresSessionStore({
+      pool,
+      createTableIfMissing: true
     });
-    
-    // Initialize with some data for development
-    this.initializeSampleData();
   }
 
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.userCurrentId++;
-    const now = new Date();
-    const user: User = { ...insertUser, id, createdAt: now };
-    this.users.set(id, user);
+    const [user] = await db.insert(users).values(insertUser).returning();
     return user;
   }
 
   async getMissingPerson(id: number): Promise<MissingPerson | undefined> {
-    return this.missingPersons.get(id);
+    const [person] = await db.select().from(missingPersons).where(eq(missingPersons.id, id));
+    return person;
   }
 
   async searchMissingPersons(params: SearchMissingPersonParams): Promise<MissingPerson[]> {
-    let results = Array.from(this.missingPersons.values());
+    let query = db.select().from(missingPersons);
+    const conditions = [];
 
     if (params.name) {
-      results = results.filter(p => 
-        p.name.toLowerCase().includes(params.name!.toLowerCase())
-      );
+      conditions.push(like(missingPersons.name, `%${params.name}%`));
     }
 
     if (params.location) {
-      results = results.filter(p => 
-        p.lastLocation.toLowerCase().includes(params.location!.toLowerCase())
-      );
+      conditions.push(like(missingPersons.lastLocation, `%${params.location}%`));
     }
 
     if (params.age) {
-      results = results.filter(p => p.age === params.age);
+      conditions.push(eq(missingPersons.age, params.age));
     }
 
     if (params.gender) {
-      results = results.filter(p => p.gender === params.gender);
+      conditions.push(eq(missingPersons.gender, params.gender));
     }
 
     if (params.status) {
-      results = results.filter(p => p.status === params.status);
+      conditions.push(eq(missingPersons.status, params.status));
     }
 
     if (params.lastSeenDate) {
+      // Convert to Date and get day boundaries
       const searchDate = new Date(params.lastSeenDate);
-      results = results.filter(p => {
-        const personDate = new Date(p.lastSeenDate);
-        return personDate.toDateString() === searchDate.toDateString();
-      });
+      searchDate.setHours(0, 0, 0, 0);
+      
+      const nextDay = new Date(searchDate);
+      nextDay.setDate(nextDay.getDate() + 1);
+      
+      conditions.push(
+        and(
+          gte(missingPersons.lastSeenDate, searchDate),
+          eq(missingPersons.lastSeenDate, searchDate)
+        )
+      );
     }
 
-    return results;
+    if (conditions.length > 0) {
+      // Combine all conditions with AND
+      query = query.where(and(...conditions));
+    }
+
+    return await query;
   }
 
   async createMissingPerson(person: InsertMissingPerson): Promise<MissingPerson> {
-    const id = this.personCurrentId++;
-    const now = new Date();
-    const missingPerson: MissingPerson = {
-      ...person,
-      id,
-      createdAt: now,
-      updatedAt: now
-    };
-    this.missingPersons.set(id, missingPerson);
-    return missingPerson;
+    const [createdPerson] = await db.insert(missingPersons).values(person).returning();
+    return createdPerson;
   }
 
   async updateMissingPerson(id: number, updateData: InsertMissingPerson): Promise<MissingPerson> {
-    const existingPerson = this.missingPersons.get(id);
-    
-    if (!existingPerson) {
+    const [updated] = await db
+      .update(missingPersons)
+      .set({
+        ...updateData,
+        updatedAt: new Date()
+      })
+      .where(eq(missingPersons.id, id))
+      .returning();
+
+    if (!updated) {
       throw new Error("Missing person not found");
     }
-    
-    const now = new Date();
-    const updatedPerson: MissingPerson = {
-      ...existingPerson,
-      ...updateData,
-      id,
-      updatedAt: now
-    };
-    
-    this.missingPersons.set(id, updatedPerson);
-    return updatedPerson;
+
+    return updated;
   }
 
   async getSuccessStories(): Promise<SuccessStory[]> {
-    return Array.from(this.successStories.values());
+    return await db.select().from(successStories);
   }
 
   async createSuccessStory(story: InsertSuccessStory): Promise<SuccessStory> {
-    const id = this.storyCurrentId++;
-    const now = new Date();
-    const successStory: SuccessStory = { ...story, id, createdAt: now };
-    this.successStories.set(id, successStory);
-    
-    // Also update the missing person status to "found"
-    const missingPerson = this.missingPersons.get(story.missingPersonId);
-    if (missingPerson) {
-      missingPerson.status = "found";
-      this.missingPersons.set(missingPerson.id, missingPerson);
-    }
-    
-    return successStory;
+    // First, update the missing person's status to "found"
+    await db
+      .update(missingPersons)
+      .set({ status: "found", updatedAt: new Date() })
+      .where(eq(missingPersons.id, story.missingPersonId));
+
+    // Then create the success story
+    const [createdStory] = await db.insert(successStories).values(story).returning();
+    return createdStory;
   }
 
   async getStatistics(): Promise<Statistics> {
-    const allPersons = Array.from(this.missingPersons.values());
-    const foundPersons = allPersons.filter(p => p.status === "found");
+    // Count total missing persons
+    const [{ count: totalCount }] = await db
+      .select({ count: db.fn.count() })
+      .from(missingPersons);
     
+    // Count found persons
+    const [{ count: foundCount }] = await db
+      .select({ count: db.fn.count() })
+      .from(missingPersons)
+      .where(eq(missingPersons.status, "found"));
+    
+    // Get the date for one month ago
     const now = new Date();
     const oneMonthAgo = new Date(now);
     oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
     
+    // Get the date for one year ago
     const oneYearAgo = new Date(now);
     oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
     
-    const monthlyCount = allPersons.filter(p => new Date(p.createdAt) >= oneMonthAgo).length;
-    const yearlyCount = allPersons.filter(p => new Date(p.createdAt) >= oneYearAgo).length;
+    // Count monthly new cases
+    const [{ count: monthlyCount }] = await db
+      .select({ count: db.fn.count() })
+      .from(missingPersons)
+      .where(gte(missingPersons.createdAt, oneMonthAgo));
+    
+    // Count yearly new cases
+    const [{ count: yearlyCount }] = await db
+      .select({ count: db.fn.count() })
+      .from(missingPersons)
+      .where(gte(missingPersons.createdAt, oneYearAgo));
     
     return {
-      totalMissingPersons: allPersons.length,
-      foundPersons: foundPersons.length,
-      monthlyCount,
-      yearlyCount
+      totalMissingPersons: Number(totalCount),
+      foundPersons: Number(foundCount),
+      monthlyCount: Number(monthlyCount),
+      yearlyCount: Number(yearlyCount)
     };
-  }
-  
-  private initializeSampleData() {
-    // This method would initialize data but is intentionally left empty
-    // as per the guidelines not to generate mock data
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();

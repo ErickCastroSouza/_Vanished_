@@ -1,6 +1,7 @@
 import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { relations } from "drizzle-orm";
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
@@ -10,6 +11,10 @@ export const users = pgTable("users", {
   name: text("name").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+export const usersRelations = relations(users, ({ many }) => ({
+  missingPersons: many(missingPersons),
+}));
 
 export const missingPersons = pgTable("missing_persons", {
   id: serial("id").primaryKey(),
@@ -32,6 +37,14 @@ export const missingPersons = pgTable("missing_persons", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const missingPersonsRelations = relations(missingPersons, ({ one, many }) => ({
+  reporter: one(users, {
+    fields: [missingPersons.reportedBy],
+    references: [users.id],
+  }),
+  successStories: many(successStories),
+}));
+
 export const successStories = pgTable("success_stories", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
@@ -40,6 +53,13 @@ export const successStories = pgTable("success_stories", {
   photoUrl: text("photo_url"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+export const successStoriesRelations = relations(successStories, ({ one }) => ({
+  missingPerson: one(missingPersons, {
+    fields: [successStories.missingPersonId],
+    references: [missingPersons.id],
+  }),
+}));
 
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
