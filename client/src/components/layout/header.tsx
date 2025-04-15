@@ -2,27 +2,29 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
-
-// Temporary mock type until auth is fixed
-type User = {
-  id: number;
-  username: string;
-  name?: string;
-};
+import { useAuth } from "@/hooks/use-auth";
 
 export default function Header() {
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  // Temporarily set to null until auth is fixed
-  const user: User | null = null;
+  let user = null;
+  let logoutMutation = { mutate: () => console.log("Logout not available") };
+
+  try {
+    // Try to use the auth context, but don't crash if it's not available
+    const auth = useAuth();
+    user = auth.user;
+    logoutMutation = auth.logoutMutation;
+  } catch (error) {
+    console.warn("Auth context not available in header:", error);
+  }
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
   };
 
   const handleLogout = () => {
-    // Temporarily disabled until auth is fixed
-    console.log("Logout clicked");
+    logoutMutation.mutate();
   };
 
   return (
