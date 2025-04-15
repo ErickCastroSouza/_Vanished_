@@ -26,7 +26,7 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-[#182720] py-4 px-4 md:px-6 lg:px-8">
+    <header className="bg-[#2A3828] py-4 px-4 md:px-6 lg:px-8">
       <div className="container mx-auto flex items-center justify-between">
         <Link href="/" className="text-orange-500 font-bold text-2xl">
           Vanished
@@ -77,7 +77,7 @@ export default function Header() {
       
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-[#182720] py-4 mt-2">
+        <div className="md:hidden bg-[#2A3828] py-4 mt-2">
           <nav className="container mx-auto flex flex-col space-y-4 px-4">
             <Link
               href="/search"
