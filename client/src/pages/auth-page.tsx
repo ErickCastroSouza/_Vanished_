@@ -133,18 +133,18 @@ export default function AuthPage() {
   return (
     <div className="container flex min-h-screen items-center justify-center px-4 py-12">
       <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl">
-        <Card className="w-full">
+        <Card className="w-full bg-[#1a2718]">
           <CardHeader>
-            <CardTitle className="text-2xl">Acesse sua conta</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-2xl text-white">Acesse sua conta</CardTitle>
+            <CardDescription className="text-gray-300">
               Entre ou crie uma conta para ajudar a encontrar pessoas desaparecidas
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="text-white">
             <Tabs defaultValue="login" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="login">Login</TabsTrigger>
-                <TabsTrigger value="register">Cadastro</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 bg-[#283323]">
+                <TabsTrigger value="login" className="data-[state=active]:bg-[#2A3828] data-[state=active]:text-white">Login</TabsTrigger>
+                <TabsTrigger value="register" className="data-[state=active]:bg-[#2A3828] data-[state=active]:text-white">Cadastro</TabsTrigger>
               </TabsList>
               <TabsContent value="login">
                 <Form {...loginForm}>
@@ -154,9 +154,9 @@ export default function AuthPage() {
                       name="username"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Usuário</FormLabel>
+                          <FormLabel className="text-gray-200">Usuário</FormLabel>
                           <FormControl>
-                            <Input placeholder="seu_usuario" {...field} />
+                            <Input placeholder="seu_usuario" {...field} className="bg-[#243020] border-[#3c4b39] text-white placeholder:text-gray-400" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -167,9 +167,9 @@ export default function AuthPage() {
                       name="password"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Senha</FormLabel>
+                          <FormLabel className="text-gray-200">Senha</FormLabel>
                           <FormControl>
-                            <Input type="password" placeholder="••••••••" {...field} />
+                            <Input type="password" placeholder="••••••••" {...field} className="bg-[#243020] border-[#3c4b39] text-white placeholder:text-gray-400" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -193,9 +193,9 @@ export default function AuthPage() {
                       name="username"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Usuário</FormLabel>
+                          <FormLabel className="text-gray-200">Usuário</FormLabel>
                           <FormControl>
-                            <Input placeholder="seu_usuario" {...field} />
+                            <Input placeholder="seu_usuario" {...field} className="bg-[#243020] border-[#3c4b39] text-white placeholder:text-gray-400" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -206,9 +206,9 @@ export default function AuthPage() {
                       name="name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Nome Completo</FormLabel>
+                          <FormLabel className="text-gray-200">Nome Completo</FormLabel>
                           <FormControl>
-                            <Input placeholder="Seu Nome Completo" {...field} />
+                            <Input placeholder="Seu Nome Completo" {...field} className="bg-[#243020] border-[#3c4b39] text-white placeholder:text-gray-400" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -219,9 +219,9 @@ export default function AuthPage() {
                       name="email"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Email</FormLabel>
+                          <FormLabel className="text-gray-200">Email</FormLabel>
                           <FormControl>
-                            <Input placeholder="seu@email.com" {...field} />
+                            <Input placeholder="seu@email.com" {...field} className="bg-[#243020] border-[#3c4b39] text-white placeholder:text-gray-400" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -232,9 +232,9 @@ export default function AuthPage() {
                       name="password"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Senha</FormLabel>
+                          <FormLabel className="text-gray-200">Senha</FormLabel>
                           <FormControl>
-                            <Input type="password" placeholder="••••••••" {...field} />
+                            <Input type="password" placeholder="••••••••" {...field} className="bg-[#243020] border-[#3c4b39] text-white placeholder:text-gray-400" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -245,9 +245,9 @@ export default function AuthPage() {
                       name="confirmPassword"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Confirmar Senha</FormLabel>
+                          <FormLabel className="text-gray-200">Confirmar Senha</FormLabel>
                           <FormControl>
-                            <Input type="password" placeholder="••••••••" {...field} />
+                            <Input type="password" placeholder="••••••••" {...field} className="bg-[#243020] border-[#3c4b39] text-white placeholder:text-gray-400" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -266,13 +266,13 @@ export default function AuthPage() {
             </Tabs>
           </CardContent>
           <CardFooter className="flex justify-center">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-gray-300">
               Ao criar uma conta, você concorda com nossos{" "}
-              <a href="#" className="underline text-orange-500">
+              <a href="#" className="underline text-orange-500 hover:text-orange-400">
                 Termos de serviço
               </a>{" "}
               e{" "}
-              <a href="#" className="underline text-orange-500">
+              <a href="#" className="underline text-orange-500 hover:text-orange-400">
                 Política de privacidade
               </a>
               .
