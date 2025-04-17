@@ -5,7 +5,8 @@ import {
 } from "@shared/schema";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
-import { db, pool } from './db';
+import { db } from './db';
+import { Pool } from '@neondatabase/serverless';
 import { eq, like, and, gte, lt, sql, count } from "drizzle-orm";
 
 const PostgresSessionStore = connectPg(session);
@@ -40,7 +41,7 @@ export class DatabaseStorage implements IStorage {
 
   constructor() {
     this.sessionStore = new PostgresSessionStore({
-      pool,
+      Pool,
       createTableIfMissing: true
     });
   }

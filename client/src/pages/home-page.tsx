@@ -8,6 +8,7 @@ import MissingPersonCard from "@/components/missing-person-card";
 import SearchForm from "@/components/search-form";
 import ProcessSteps from "@/components/process-steps";
 import SuccessStoryCard from "@/components/success-story-card";
+import Homepage_Main_Image from "@/components/images/homepage_main_image.png";
 
 interface Statistics {
   totalMissingPersons: number;
@@ -79,7 +80,7 @@ export default function HomePage() {
                 </Button>
               </Link>
               <Link href="/search">
-                <Button variant="outline" className="border-white text-white hover:bg-white hover:text-primary w-full sm:w-auto">
+                <Button variant="outline" className="bg-orange-500 hover:bg-orange-600 text-white w-full sm:w-auto">
                   Buscar pessoas
                 </Button>
               </Link>
@@ -88,8 +89,8 @@ export default function HomePage() {
           
           <div className="border-2 border-orange-500 rounded-lg overflow-hidden">
             <img 
-              src="https://sdmntprsouthcentralus.oaiusercontent.com/files/00000000-7c34-61f7-9648-0ebfc7f4e10a/raw?se=2025-04-16T02%3A39%3A13Z&sp=r&sv=2024-08-04&sr=b&scid=5ef1b447-415c-5664-9bab-10499bd82a8a&skoid=ae70be19-8043-4428-a990-27c58b478304&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-04-15T06%3A46%3A33Z&ske=2025-04-16T06%3A46%3A33Z&sks=b&skv=2024-08-04&sig=QEn7STgfz%2BTM9mvf8oh1/oAOSDn5OD1d5P2xHL6Y/Fs%3D" 
-              alt="Pessoas reunidas em busca por desaparecidos" 
+              src={Homepage_Main_Image} 
+              alt="Pessoas desaparecidas fictícias" 
               className="w-full h-[500px] object-cover"
             />
           </div>
