@@ -88,7 +88,7 @@ export default function HomePage() {
           
           <div className="border-2 border-orange-500 rounded-lg overflow-hidden">
             <img 
-              src="https://images.unsplash.com/photo-1673169128434-90fa9fb9b4a7?q=80&w=1035&auto=format&fit=crop" 
+              src="https://sdmntprsouthcentralus.oaiusercontent.com/files/00000000-7c34-61f7-9648-0ebfc7f4e10a/raw?se=2025-04-16T02%3A39%3A13Z&sp=r&sv=2024-08-04&sr=b&scid=5ef1b447-415c-5664-9bab-10499bd82a8a&skoid=ae70be19-8043-4428-a990-27c58b478304&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-04-15T06%3A46%3A33Z&ske=2025-04-16T06%3A46%3A33Z&sks=b&skv=2024-08-04&sig=QEn7STgfz%2BTM9mvf8oh1/oAOSDn5OD1d5P2xHL6Y/Fs%3D" 
               alt="Pessoas reunidas em busca por desaparecidos" 
               className="w-full h-[500px] object-cover"
             />
