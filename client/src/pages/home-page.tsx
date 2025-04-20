@@ -17,12 +17,22 @@ interface Statistics {
   yearlyCount: number;
 }
 
+const fakePeopleImages = [
+  Homepage_Main_Image,
+  Homepage_Main_Image,
+  Homepage_Main_Image,
+];
+
 export default function HomePage() {
-  const { data: missingPersons, isLoading: isLoadingPersons } = useQuery<MissingPerson[]>({
+  const { data: missingPersons, isLoading: isLoadingPersons } = useQuery<
+    MissingPerson[]
+  >({
     queryKey: ["/api/missing-persons"],
   });
 
-  const { data: successStories, isLoading: isLoadingStories } = useQuery<SuccessStory[]>({
+  const { data: successStories, isLoading: isLoadingStories } = useQuery<
+    SuccessStory[]
+  >({
     queryKey: ["/api/success-stories"],
   });
 
@@ -41,7 +51,7 @@ export default function HomePage() {
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-6">
               Em média 217 pessoas desaparecem por dia no Brasil
             </h1>
-            
+
             <div className="flex space-x-12 mb-8">
               <div>
                 <p className="text-orange-500 text-2xl md:text-3xl font-bold">
@@ -64,15 +74,16 @@ export default function HomePage() {
                 <p className="text-sm text-gray-300">Por Ano</p>
               </div>
             </div>
-            
+
             <p className="text-gray-300 mb-8 max-w-xl">
-              Aqui, você pode registrar um desaparecimento, compartilhar informações e acessar 
-              recursos de pessoas encontradas. Com a força da comunidade e o apoio de tecnologia, 
-              acreditamos que cada compartilhamento pode fazer a diferença. Junte-se a nós nessa 
-              missão. Quanto mais pessoas envolvidas, maiores as chances de reunir famílias e 
-              trazer esperança de volta aos lares.
+              Aqui, você pode registrar um desaparecimento, compartilhar
+              informações e acessar recursos de pessoas encontradas. Com a força
+              da comunidade e o apoio de tecnologia, acreditamos que cada
+              compartilhamento pode fazer a diferença. Junte-se a nós nessa
+              missão. Quanto mais pessoas envolvidas, maiores as chances de
+              reunir famílias e trazer esperança de volta aos lares.
             </p>
-            
+
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
               <Link href="/register-missing">
                 <Button className="bg-orange-500 hover:bg-orange-600 text-white w-full sm:w-auto">
@@ -80,19 +91,29 @@ export default function HomePage() {
                 </Button>
               </Link>
               <Link href="/search">
-                <Button variant="outline" className="bg-orange-500 hover:bg-orange-600 text-white w-full sm:w-auto">
+                <Button
+                  variant="outline"
+                  className="bg-orange-500 hover:bg-orange-600 text-white w-full sm:w-auto"
+                >
                   Buscar pessoas
                 </Button>
               </Link>
             </div>
           </div>
-          
-          <div className="border-2 border-orange-500 rounded-lg overflow-hidden">
-            <img 
-              src={Homepage_Main_Image} 
-              alt="Pessoas desaparecidas fictícias" 
-              className="w-full h-[500px] object-cover"
-            />
+
+          <div className="overflow-hidden w-full border-2 border-orange-500 rounded-lg h-[500px]">
+            <div className="flex animate-scroll">
+              {[...Array(2)].flatMap(() =>
+                Array.from({ length: 12 }).map((_, index) => (
+                  <img
+                    key={index}
+                    src={Homepage_Main_Image}
+                    alt="Pessoas desaparecidas fictícias"
+                    className="h-[500px] w-auto object-cover flex-shrink-0"
+                  />
+                ))
+              )}
+            </div>
           </div>
         </div>
       </section>
@@ -111,14 +132,26 @@ export default function HomePage() {
             <h2 className="text-2xl md:text-3xl font-bold mb-4 md:mb-0">
               Pessoas recentemente desaparecidas
             </h2>
-            <Link href="/search" className="text-orange-500 hover:text-orange-600 font-medium flex items-center">
+            <Link
+              href="/search"
+              className="text-orange-500 hover:text-orange-600 font-medium flex items-center"
+            >
               Ver todas
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 ml-2"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M5 12h14M12 5l7 7-7 7" />
               </svg>
             </Link>
           </div>
-          
+
           {isLoadingPersons ? (
             <div className="flex justify-center py-12">
               <Loader2 className="h-8 w-8 animate-spin" />
@@ -128,10 +161,12 @@ export default function HomePage() {
               {recentMissingPersons.map((person) => (
                 <MissingPersonCard key={person.id} person={person} />
               ))}
-              
+
               {recentMissingPersons.length === 0 && (
                 <div className="col-span-full text-center py-8">
-                  <p className="text-gray-400">Nenhuma pessoa desaparecida registrada ainda.</p>
+                  <p className="text-gray-400">
+                    Nenhuma pessoa desaparecida registrada ainda.
+                  </p>
                 </div>
               )}
             </div>
@@ -142,9 +177,11 @@ export default function HomePage() {
       {/* How It Works Section */}
       <section className="py-12 bg-[#182720] px-4 md:px-6 lg:px-8">
         <div className="container mx-auto">
-          <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">Como funciona</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">
+            Como funciona
+          </h2>
           <ProcessSteps />
-          
+
           <div className="text-center mt-12">
             <Link href="/register-missing">
               <Button className="bg-orange-500 hover:bg-orange-600 text-white">
@@ -158,14 +195,17 @@ export default function HomePage() {
       {/* Registration CTA Section */}
       <section className="py-12 px-4 md:px-6 lg:px-8 bg-[url('https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=1470&auto=format&fit=crop')] bg-cover bg-center relative">
         <div className="absolute inset-0 bg-primary bg-opacity-90"></div>
-        
+
         <div className="container mx-auto relative z-10">
           <div className="max-w-2xl mx-auto text-center">
-            <h2 className="text-2xl md:text-3xl font-bold mb-6">Junte-se à nossa comunidade</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mb-6">
+              Junte-se à nossa comunidade
+            </h2>
             <p className="text-gray-300 mb-8">
-              Registre-se para ajudar na busca por pessoas desaparecidas. Juntos, podemos fazer a diferença e reunir famílias.
+              Registre-se para ajudar na busca por pessoas desaparecidas.
+              Juntos, podemos fazer a diferença e reunir famílias.
             </p>
-            
+
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 justify-center">
               <Link href="/auth">
                 <Button className="bg-orange-500 hover:bg-orange-600 text-white w-full sm:w-auto">
@@ -173,7 +213,10 @@ export default function HomePage() {
                 </Button>
               </Link>
               <Link href="/search">
-                <Button variant="outline" className="border-white text-white hover:bg-white hover:text-primary w-full sm:w-auto">
+                <Button
+                  variant="outline"
+                  className="border-white text-white hover:bg-white hover:text-primary w-full sm:w-auto"
+                >
                   Saiba mais
                 </Button>
               </Link>
@@ -185,8 +228,10 @@ export default function HomePage() {
       {/* Latest Success Stories */}
       <section className="py-12 px-4 md:px-6 lg:px-8">
         <div className="container mx-auto">
-          <h2 className="text-2xl md:text-3xl font-bold mb-12 text-center">Histórias de sucesso</h2>
-          
+          <h2 className="text-2xl md:text-3xl font-bold mb-12 text-center">
+            Histórias de sucesso
+          </h2>
+
           {isLoadingStories ? (
             <div className="flex justify-center py-12">
               <Loader2 className="h-8 w-8 animate-spin" />
@@ -196,20 +241,34 @@ export default function HomePage() {
               {successStories?.slice(0, 3).map((story) => (
                 <SuccessStoryCard key={story.id} story={story} />
               ))}
-              
+
               {(!successStories || successStories.length === 0) && (
                 <div className="col-span-full text-center py-8">
-                  <p className="text-gray-400">Nenhuma história de sucesso registrada ainda.</p>
+                  <p className="text-gray-400">
+                    Nenhuma história de sucesso registrada ainda.
+                  </p>
                 </div>
               )}
             </div>
           )}
-          
+
           <div className="text-center mt-12">
-            <Link href="/success-stories" className="text-orange-500 hover:text-orange-600 font-medium flex items-center justify-center">
+            <Link
+              href="/success-stories"
+              className="text-orange-500 hover:text-orange-600 font-medium flex items-center justify-center"
+            >
               Ver todas as histórias
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 ml-2"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M5 12h14M12 5l7 7-7 7" />
               </svg>
             </Link>
           </div>
