@@ -35,7 +35,9 @@ export function setupAuth(app: Express) {
     saveUninitialized: false,
     store: storage.sessionStore,
     cookie: {
-      maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
+      maxAge: 1000 * 60 * 60 * 24 * 7,
+      sameSite: "lax", // ou "none" se usar HTTPS
+      secure: false,   // deve ser true se estiver em produção com HTTPS
     }
   };
 
@@ -61,22 +63,28 @@ export function setupAuth(app: Express) {
     done(null, user);
   });
 
-  app.post("/api/register", async (req, res, next) => {
-    const existingUser = await storage.getUserByUsername(req.body.username);
-    if (existingUser) {
-      return res.status(400).send("Username already exists");
-    }
+ app.post("/api/register", async (req, res, next) => {
+  const existingUser = await storage.getUserByUsername(req.body.username);
+  if (existingUser) {
+    return res.status(400).send("Username already exists");
+  }
 
-    const user = await storage.createUser({
-      ...req.body,
-      password: await hashPassword(req.body.password),
-    });
+  const newUserData = {
+    username: req.body.username,
+    email: req.body.email,
+    name: req.body.name,
+    password: await hashPassword(req.body.password),
+  };
 
-    req.login(user, (err) => {
-      if (err) return next(err);
-      res.status(201).json(user);
-    });
+  console.log("Criando usuário com dados:", newUserData);
+
+  const user = await storage.createUser(newUserData);
+
+  req.login(user, (err) => {
+    if (err) return next(err);
+    res.status(201).json(user);
   });
+});
 
   app.post("/api/login", passport.authenticate("local"), (req, res) => {
     res.status(200).json(req.user);

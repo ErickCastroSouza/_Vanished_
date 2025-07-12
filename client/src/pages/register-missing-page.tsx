@@ -65,11 +65,10 @@ export default function RegisterMissingPage() {
     mutationFn: async (data: FormValues) => {
       // Convert the form data to match the database schema
       const missingPersonData = {
-        ...data,
-        reportedBy: user!.id,
-        // In a real application, we would handle file uploads here
-        // For now, we'll just use the photoUrl field directly
-      };
+  ...data,
+  lastSeenDate: new Date(data.lastSeenDate), // <-- transforma a string em Date
+  reportedBy: user!.id,
+};
       
       const res = await apiRequest("POST", "/api/missing-persons", missingPersonData);
       return await res.json();
@@ -108,15 +107,15 @@ export default function RegisterMissingPage() {
   };
 
   return (
-    <div className="container py-12 px-4 max-w-4xl">
-      <Card>
+    <div className="container py-12 px-4 max-w-4xl ">
+      <Card  className="w-full bg-[#1a2718]">
         <CardHeader>
           <CardTitle className="text-2xl">Registrar Pessoa Desaparecida</CardTitle>
           <CardDescription>
             Preencha o formulário com todas as informações possíveis para ajudar na busca.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent  className="text-white">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="space-y-4">
@@ -130,7 +129,7 @@ export default function RegisterMissingPage() {
                       <FormItem>
                         <FormLabel>Nome Completo</FormLabel>
                         <FormControl>
-                          <Input placeholder="Nome da pessoa desaparecida" {...field} />
+                          <Input  className="bg-[#243020] border-[#3c4b39] text-white placeholder:text-gray-400" placeholder="Nome da pessoa desaparecida" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -144,7 +143,7 @@ export default function RegisterMissingPage() {
                       <FormItem>
                         <FormLabel>Idade</FormLabel>
                         <FormControl>
-                          <Input type="number" placeholder="Idade" {...field} />
+                          <Input  className="bg-[#243020] border-[#3c4b39] text-white placeholder:text-gray-400" type="number" placeholder="Idade" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -163,7 +162,7 @@ export default function RegisterMissingPage() {
                           onValueChange={field.onChange} 
                           defaultValue={field.value}
                         >
-                          <FormControl>
+                          <FormControl  className="bg-[#243020] border-[#3c4b39] text-white placeholder:text-gray-400">
                             <SelectTrigger>
                               <SelectValue placeholder="Selecione" />
                             </SelectTrigger>
@@ -185,7 +184,7 @@ export default function RegisterMissingPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Altura</FormLabel>
-                        <FormControl>
+                        <FormControl  className="bg-[#243020] border-[#3c4b39] text-white placeholder:text-gray-400">
                           <Input placeholder="Ex: 1,75m" {...field} />
                         </FormControl>
                         <FormMessage />
@@ -203,7 +202,7 @@ export default function RegisterMissingPage() {
                           onValueChange={field.onChange} 
                           defaultValue={field.value}
                         >
-                          <FormControl>
+                          <FormControl  className="bg-[#243020] border-[#3c4b39] text-white placeholder:text-gray-400">
                             <SelectTrigger>
                               <SelectValue placeholder="Selecione" />
                             </SelectTrigger>
@@ -234,7 +233,7 @@ export default function RegisterMissingPage() {
                       <FormControl>
                         <Textarea 
                           placeholder="Descreva características físicas como: cor do cabelo, olhos, marcas distintivas, etc." 
-                          className="min-h-[80px]"
+                           className="bg-[#243020] border-[#3c4b39] text-white placeholder:text-gray-400"
                           {...field} 
                         />
                       </FormControl>
@@ -258,7 +257,7 @@ export default function RegisterMissingPage() {
                         type="file"
                         accept="image/*"
                         onChange={handleFileChange}
-                        className="cursor-pointer"
+                        className="cursor-pointer bg-[#243020] border-[#3c4b39] text-white placeholder:text-gray-400"
                       />
                       <p className="text-sm text-muted-foreground mt-1">
                         Carregue uma foto clara e recente da pessoa desaparecida.
@@ -278,7 +277,7 @@ export default function RegisterMissingPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Data de Desaparecimento</FormLabel>
-                        <FormControl>
+                        <FormControl className="bg-[#243020] border-[#3c4b39] text-white placeholder:text-gray-400">
                           <Input type="date" {...field} />
                         </FormControl>
                         <FormMessage />
@@ -292,7 +291,7 @@ export default function RegisterMissingPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Local do Desaparecimento</FormLabel>
-                        <FormControl>
+                        <FormControl className="bg-[#243020] border-[#3c4b39] text-white placeholder:text-gray-400">
                           <Input placeholder="Cidade, Estado" {...field} />
                         </FormControl>
                         <FormMessage />
@@ -307,7 +306,7 @@ export default function RegisterMissingPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Circunstâncias do Desaparecimento</FormLabel>
-                      <FormControl>
+                      <FormControl className="bg-[#243020] border-[#3c4b39] text-white placeholder:text-gray-400">
                         <Textarea 
                           placeholder="Descreva como ocorreu o desaparecimento, o que a pessoa vestia, etc." 
                           className="min-h-[100px]"
@@ -330,7 +329,7 @@ export default function RegisterMissingPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Nome do Responsável</FormLabel>
-                        <FormControl>
+                        <FormControl className="bg-[#243020] border-[#3c4b39] text-white placeholder:text-gray-400">
                           <Input placeholder="Seu nome" {...field} />
                         </FormControl>
                         <FormMessage />
@@ -344,7 +343,7 @@ export default function RegisterMissingPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Telefone de Contato</FormLabel>
-                        <FormControl>
+                        <FormControl className="bg-[#243020] border-[#3c4b39] text-white placeholder:text-gray-400">
                           <Input placeholder="(00) 00000-0000" {...field} />
                         </FormControl>
                         <FormMessage />
@@ -359,7 +358,7 @@ export default function RegisterMissingPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Email de Contato</FormLabel>
-                      <FormControl>
+                      <FormControl className="bg-[#243020] border-[#3c4b39] text-white placeholder:text-gray-400">
                         <Input placeholder="email@exemplo.com" {...field} />
                       </FormControl>
                       <FormMessage />

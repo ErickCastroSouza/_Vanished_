@@ -1,9 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { MissingPerson, SuccessStory } from "@shared/schema";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, Search, UserPlus, Share2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import MissingPersonCard from "@/components/missing-person-card";
 import SearchForm from "@/components/search-form";
 import ProcessSteps from "@/components/process-steps";
@@ -17,27 +16,20 @@ interface Statistics {
   yearlyCount: number;
 }
 
-const fakePeopleImages = [
-  Homepage_Main_Image,
-  Homepage_Main_Image,
-  Homepage_Main_Image,
-];
-
 export default function HomePage() {
-  const { data: missingPersons, isLoading: isLoadingPersons } = useQuery<
-    MissingPerson[]
-  >({
+  const { data: missingPersons, isLoading: isLoadingPersons } = useQuery<MissingPerson[]>({
     queryKey: ["/api/missing-persons"],
+    refetchOnMount: true,
   });
 
-  const { data: successStories, isLoading: isLoadingStories } = useQuery<
-    SuccessStory[]
-  >({
+  const { data: successStories, isLoading: isLoadingStories } = useQuery<SuccessStory[]>({
     queryKey: ["/api/success-stories"],
+    refetchOnMount: true,
   });
 
   const { data: statistics, isLoading: isLoadingStats } = useQuery<Statistics>({
     queryKey: ["/api/statistics"],
+    refetchOnMount: true,
   });
 
   const recentMissingPersons = missingPersons?.slice(0, 4) || [];
@@ -76,12 +68,9 @@ export default function HomePage() {
             </div>
 
             <p className="text-gray-300 mb-8 max-w-xl">
-              Aqui, você pode registrar um desaparecimento, compartilhar
-              informações e acessar recursos de pessoas encontradas. Com a força
-              da comunidade e o apoio de tecnologia, acreditamos que cada
-              compartilhamento pode fazer a diferença. Junte-se a nós nessa
-              missão. Quanto mais pessoas envolvidas, maiores as chances de
-              reunir famílias e trazer esperança de volta aos lares.
+              Aqui, você pode registrar um desaparecimento, compartilhar informações e acessar recursos
+              de pessoas encontradas. Com a força da comunidade e o apoio de tecnologia, acreditamos que cada
+              compartilhamento pode fazer a diferença. Junte-se a nós nessa missão.
             </p>
 
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
@@ -103,10 +92,10 @@ export default function HomePage() {
 
           <div className="overflow-hidden w-full border-2 border-orange-500 rounded-lg h-[500px]">
             <div className="flex animate-scroll">
-              {[...Array(2)].flatMap(() =>
-                Array.from({ length: 12 }).map((_, index) => (
+              {[...Array(2)].flatMap((_, outerIndex) =>
+                Array.from({ length: 12 }).map((_, innerIndex) => (
                   <img
-                    key={index}
+                    key={`img-${outerIndex}-${innerIndex}`}
                     src={Homepage_Main_Image}
                     alt="Pessoas desaparecidas fictícias"
                     className="h-[500px] w-auto object-cover flex-shrink-0"

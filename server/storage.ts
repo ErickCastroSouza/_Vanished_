@@ -6,7 +6,7 @@ import {
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { db } from './db';
-import { Pool } from '@neondatabase/serverless';
+import { Pool } from 'pg';
 import { eq, like, and, gte, lt, sql, count } from "drizzle-orm";
 
 const PostgresSessionStore = connectPg(session);
@@ -41,9 +41,15 @@ export class DatabaseStorage implements IStorage {
 
   constructor() {
     this.sessionStore = new PostgresSessionStore({
-      Pool,
-      createTableIfMissing: true
-    });
+    pool: new Pool({
+    host: "localhost",
+    port: 5432,
+    user: "postgres",
+    password: "E7r7t7y7u7i7o7p7",
+    database: "vanished_database",
+  }),
+  createTableIfMissing: true,
+});
   }
 
   async getUser(id: number): Promise<User | undefined> {

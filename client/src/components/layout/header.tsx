@@ -7,26 +7,16 @@ import { useAuth } from "@/hooks/use-auth";
 export default function Header() {
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  let user = null;
-  
-  // For logout functionality
+
+  // Chame o hook uma vez aqui, no topo do componente
+  const auth = useAuth();
+  const user = auth.user;
+
+  // Função de logout usando logoutMutation do hook
   const handleLogout = () => {
-    try {
-      const { logoutMutation } = useAuth();
-      logoutMutation.mutate();
-    } catch (error) {
-      console.warn("Auth not available for logout:", error);
-    }
+    auth.logoutMutation.mutate();
   };
-  
-  // Try to get user data if available
-  try {
-    const auth = useAuth();
-    user = auth.user;
-  } catch (error) {
-    console.warn("Auth context not available for user data:", error);
-  }
-  
+
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
   };

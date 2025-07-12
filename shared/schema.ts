@@ -85,7 +85,12 @@ export const searchMissingPersonSchema = z.object({
   age: z.number().optional(),
   gender: z.string().optional(),
   status: z.string().optional(),
-  lastSeenDate: z.string().optional(),
+  lastSeenDate: z
+  .string()
+  .refine((val) => !isNaN(Date.parse(val)), {
+    message: "Data inválida",
+  })
+  .transform((val) => new Date(val))
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
