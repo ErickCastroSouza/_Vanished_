@@ -41,7 +41,7 @@ export default function SearchPage() {
         
         <div className="mb-12">
           <SearchForm onSearch={handleSearch} />
-        </div>
+        </div>  
         
         <div className="mb-8">
           <h2 className="text-xl font-semibold mb-4">Resultados da busca</h2>

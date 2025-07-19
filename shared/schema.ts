@@ -82,15 +82,16 @@ export const insertSuccessStorySchema = createInsertSchema(successStories).omit(
 export const searchMissingPersonSchema = z.object({
   name: z.string().optional(),
   location: z.string().optional(),
-  age: z.number().optional(),
+  age: z
+    .string()
+    .optional()
+    .refine((val) => !val || !isNaN(Number(val)), "Idade inválida"),
   gender: z.string().optional(),
   status: z.string().optional(),
   lastSeenDate: z
-  .string()
-  .refine((val) => !isNaN(Date.parse(val)), {
-    message: "Data inválida",
-  })
-  .transform((val) => new Date(val))
+    .string()
+    .optional()
+    .refine((val) => !val || !isNaN(Date.parse(val)), "Data inválida"),
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;

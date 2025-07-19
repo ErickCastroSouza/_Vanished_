@@ -18,13 +18,29 @@ import { insertMissingPersonSchema } from "@shared/schema";
 // Create a form schema based on the database schema
 const formSchema = z.object({
   name: z.string().min(3, "Nome deve ter pelo menos 3 caracteres"),
-  age: z.string().transform((val) => parseInt(val)),
+  age: z
+  .string()
+  .min(1, "Idade é obrigatória")
+  .refine((val) => !isNaN(Number(val)), { 
+    message: "Idade inválida",
+  })
+  .transform((val) => parseInt(val, 10))
+  .refine((val) => val > 0, {
+    message: "Idade deve ser maior que 0",
+  }),
   gender: z.string().min(1, "Selecione o gênero"),
   height: z.string().optional(),
   bloodType: z.string().optional(),
   characteristics: z.string().optional(),
   lastLocation: z.string().min(3, "Local de desaparecimento é obrigatório"),
-  lastSeenDate: z.string().min(1, "Data é obrigatória"),
+  lastSeenDate: z
+    .string()
+    .optional()
+    .refine(
+      (val) => !val || !isNaN(Date.parse(val)), 
+      { message: "Data inválida" }
+    )
+    .transform((val) => (val ? new Date(val) : undefined)),
   disappearanceCircumstances: z.string().optional(),
   status: z.string().default("missing"),
   contactName: z.string().min(3, "Nome de contato é obrigatório"),
@@ -63,16 +79,25 @@ export default function RegisterMissingPage() {
 
   const registerMutation = useMutation({
     mutationFn: async (data: FormValues) => {
-      // Convert the form data to match the database schema
-      const missingPersonData = {
-  ...data,
-  lastSeenDate: new Date(data.lastSeenDate), // <-- transforma a string em Date
-  reportedBy: user!.id,
-};
-      
-      const res = await apiRequest("POST", "/api/missing-persons", missingPersonData);
-      return await res.json();
-    },
+
+  const missingPersonData = {
+    ...data,
+    lastSeenDate: data.lastSeenDate, // envie como string se o backend espera isso
+    reportedBy: user!.id,
+  };
+
+  const res = await apiRequest("POST", "/api/missing-persons", missingPersonData);
+
+  if (!res.ok) {
+        const body = await res.json();
+        console.error("Erro no backend:", body);
+        throw new Error(body.message || "Erro ao registrar pessoa desaparecida.");
+      }
+
+  console.log("Dados enviados:", data);
+
+  return await res.json();
+},
     onSuccess: () => {
       toast({
         title: "Registro bem-sucedido",
@@ -90,8 +115,8 @@ export default function RegisterMissingPage() {
     },
   });
 
-  const onSubmit = (values: FormValues) => {
-    registerMutation.mutate(values);
+  const onSubmit = (data: FormValues) => {
+    registerMutation.mutate(data);
   };
 
   // Handle file input change for photo upload preview

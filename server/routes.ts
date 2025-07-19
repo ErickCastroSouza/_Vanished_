@@ -12,15 +12,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Missing persons routes
   app.get("/api/missing-persons", async (req, res) => {
     try {
+
+      console.log("🔍 Query recebida:", req.query);
+
       const queryParams = req.query;
+      const parseQueryParam = (param: unknown) =>
+      typeof param === "string" && param !== "undefined" ? param : undefined;
+
       const searchParams = searchMissingPersonSchema.parse({
-        name: queryParams.name ? String(queryParams.name) : undefined,
-        location: queryParams.location ? String(queryParams.location) : undefined,
-        age: queryParams.age ? Number(queryParams.age) : undefined,
-        gender: queryParams.gender ? String(queryParams.gender) : undefined,
-        status: queryParams.status ? String(queryParams.status) : undefined,
-        lastSeenDate: queryParams.lastSeenDate ? String(queryParams.lastSeenDate) : undefined,
-      });
+        name: parseQueryParam(queryParams.name),
+        location: parseQueryParam(queryParams.location),
+        age:
+          typeof queryParams.age === "string" && queryParams.age !== "undefined"
+            ? Number(queryParams.age)
+            : undefined,
+        gender: parseQueryParam(queryParams.gender),
+        status: parseQueryParam(queryParams.status),
+        lastSeenDate: parseQueryParam(queryParams.lastSeenDate),
+});
+         console.log("✅ Validação OK:", queryParams);
 
       const missingPersons = await storage.searchMissingPersons(searchParams);
       res.json(missingPersons);
@@ -54,10 +64,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
-      const validatedData = insertMissingPersonSchema.parse({
+      const body = {
         ...req.body,
         reportedBy: req.user.id,
-      });
+        lastSeenDate: new Date(req.body.lastSeenDate), // transforma string para Date
+      };
+
+      const validatedData = insertMissingPersonSchema.parse(body);
       
       const missingPerson = await storage.createMissingPerson(validatedData);
       res.status(201).json(missingPerson);

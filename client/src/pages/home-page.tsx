@@ -213,56 +213,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* Latest Success Stories */}
-      <section className="py-12 px-4 md:px-6 lg:px-8">
-        <div className="container mx-auto">
-          <h2 className="text-2xl md:text-3xl font-bold mb-12 text-center">
-            Histórias de sucesso
-          </h2>
-
-          {isLoadingStories ? (
-            <div className="flex justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin" />
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {successStories?.slice(0, 3).map((story) => (
-                <SuccessStoryCard key={story.id} story={story} />
-              ))}
-
-              {(!successStories || successStories.length === 0) && (
-                <div className="col-span-full text-center py-8">
-                  <p className="text-gray-400">
-                    Nenhuma história de sucesso registrada ainda.
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
-
-          <div className="text-center mt-12">
-            <Link
-              href="/success-stories"
-              className="text-orange-500 hover:text-orange-600 font-medium flex items-center justify-center"
-            >
-              Ver todas as histórias
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 ml-2"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
-            </Link>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }
