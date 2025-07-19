@@ -1,12 +1,13 @@
 import { defineConfig } from "drizzle-kit";
+import * as dotenv from "dotenv";
 
-const DATABASE_URL = process.env.DATABASE_URL || "postgresql://postgres:E7r7t7y7u7i7o7p7@localhost:5432/vanished_database";
+dotenv.config();
 
 export default defineConfig({
-  out: "./migrations",
   schema: "./shared/schema.ts",
+  out: "./drizzle/migrations",
   dialect: "postgresql",
   dbCredentials: {
-    url: DATABASE_URL,
+    url: process.env.DATABASE_URL!,
   },
 });

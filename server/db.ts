@@ -1,19 +1,21 @@
-
-import { Pool } from 'pg';
-import { drizzle } from 'drizzle-orm/node-postgres';
+import "dotenv/config";
+import { Pool } from "pg";
+import { drizzle } from "drizzle-orm/node-postgres";
 import * as schema from "@shared/schema";
 
-const pool = new Pool({
-    host: 'localhost',
-    port: 5432,
-    database: 'vanished_database',
-    user: 'postgres',
-    password: 'E7r7t7y7u7i7o7p7'
+export async function createDb() {
+  // Usando a connectionString diretamente da variável de ambiente
+  const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+      rejectUnauthorized: false, // necessário para conexões com Supabase
+    },
   });
-  
-  pool.on('error', (err) => {
-    console.error('Unexpected error on idle client', err);
+
+  pool.on("error", (err) => {
+    console.error("Unexpected error on idle client", err);
     process.exit(-1);
   });
-  
-  export const db = drizzle(pool, { schema });
+
+  return drizzle(pool, { schema });
+}

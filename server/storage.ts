@@ -5,9 +5,9 @@ import {
 } from "@shared/schema";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
-import { db } from './db';
+import { createDb } from './db';
 import { Pool } from 'pg';
-import { eq, like, and, gte, lt, sql, count } from "drizzle-orm";
+import { eq, like, and, gte, lt, count } from "drizzle-orm";
 
 const PostgresSessionStore = connectPg(session);
 
@@ -22,39 +22,51 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
-  
+
   getMissingPerson(id: number): Promise<MissingPerson | undefined>;
   searchMissingPersons(params: SearchMissingPersonParams): Promise<MissingPerson[]>;
   createMissingPerson(person: InsertMissingPerson): Promise<MissingPerson>;
   updateMissingPerson(id: number, person: InsertMissingPerson): Promise<MissingPerson>;
-  
+
   getSuccessStories(): Promise<SuccessStory[]>;
   createSuccessStory(story: InsertSuccessStory): Promise<SuccessStory>;
-  
+
   getStatistics(): Promise<Statistics>;
-  
-  sessionStore: any; // Using any as a temporary workaround for the session type issue
+
+  sessionStore: any;
 }
 
 export class DatabaseStorage implements IStorage {
-  sessionStore: any; // Using any as a temporary workaround for the session type issue
+  db: Awaited<ReturnType<typeof createDb>> | null = null;
+  sessionStore: any;
 
-  constructor() {
+    constructor() {
+    const pool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+      ssl: {
+        rejectUnauthorized: false, // necessário para Supabase
+      },
+    });
+
     this.sessionStore = new PostgresSessionStore({
-    pool: new Pool({
-    host: "localhost",
-    port: 5432,
-    user: "postgres",
-    password: "E7r7t7y7u7i7o7p7",
-    database: "vanished_database",
-  }),
-  createTableIfMissing: true,
-});
+      pool,
+      createTableIfMissing: true,
+    });
+  }
+
+  // Inicializa o db (deve ser chamado antes de usar outros métodos)
+  async init() {
+    this.db = await createDb();
+  }
+
+  private checkDb() {
+    if (!this.db) throw new Error("Database not initialized. Call init() first.");
   }
 
   async getUser(id: number): Promise<User | undefined> {
+    this.checkDb();
     try {
-      const result = await db.select().from(users).where(eq(users.id, id));
+      const result = await this.db!.select().from(users).where(eq(users.id, id));
       return result.length > 0 ? result[0] : undefined;
     } catch (error) {
       console.error("Error fetching user:", error);
@@ -63,8 +75,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
+    this.checkDb();
     try {
-      const result = await db.select().from(users).where(eq(users.username, username));
+      const result = await this.db!.select().from(users).where(eq(users.username, username));
       return result.length > 0 ? result[0] : undefined;
     } catch (error) {
       console.error("Error fetching user by username:", error);
@@ -73,9 +86,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
+    this.checkDb();
     try {
-      const result = await db.insert(users).values(insertUser).returning();
-      console.log("TESTE");
+      const result = await this.db!.insert(users).values(insertUser).returning();
       return result[0];
     } catch (error) {
       console.error("Error creating user:", error);
@@ -84,8 +97,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getMissingPerson(id: number): Promise<MissingPerson | undefined> {
+    this.checkDb();
     try {
-      const result = await db.select().from(missingPersons).where(eq(missingPersons.id, id));
+      const result = await this.db!.select().from(missingPersons).where(eq(missingPersons.id, id));
       return result.length > 0 ? result[0] : undefined;
     } catch (error) {
       console.error("Error fetching missing person:", error);
@@ -94,8 +108,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async searchMissingPersons(params: SearchMissingPersonParams): Promise<MissingPerson[]> {
+    this.checkDb();
     try {
-      let conditions = [];
+      const conditions = [];
 
       if (params.name) {
         conditions.push(like(missingPersons.name, `%${params.name}%`));
@@ -118,13 +133,12 @@ export class DatabaseStorage implements IStorage {
       }
 
       if (params.lastSeenDate) {
-        // Convert to Date and get day boundaries
         const searchDate = new Date(params.lastSeenDate);
         searchDate.setHours(0, 0, 0, 0);
-        
+
         const nextDay = new Date(searchDate);
         nextDay.setDate(nextDay.getDate() + 1);
-        
+
         conditions.push(
           and(
             gte(missingPersons.lastSeenDate, searchDate),
@@ -133,9 +147,7 @@ export class DatabaseStorage implements IStorage {
         );
       }
 
-      // Build query with conditions
-      let query = db.select().from(missingPersons);
-      
+      let query = this.db!.select().from(missingPersons);
       if (conditions.length > 0) {
         query = query.where(and(...conditions));
       }
@@ -149,8 +161,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createMissingPerson(person: InsertMissingPerson): Promise<MissingPerson> {
+    this.checkDb();
     try {
-      const result = await db.insert(missingPersons).values(person).returning();
+      const result = await this.db!.insert(missingPersons).values(person).returning();
       return result[0];
     } catch (error) {
       console.error("Error creating missing person:", error);
@@ -159,9 +172,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateMissingPerson(id: number, updateData: InsertMissingPerson): Promise<MissingPerson> {
+    this.checkDb();
     try {
       const now = new Date();
-      const result = await db
+      const result = await this.db!
         .update(missingPersons)
         .set({
           ...updateData,
@@ -182,8 +196,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getSuccessStories(): Promise<SuccessStory[]> {
+    this.checkDb();
     try {
-      return await db.select().from(successStories);
+      return await this.db!.select().from(successStories);
     } catch (error) {
       console.error("Error fetching success stories:", error);
       return [];
@@ -191,18 +206,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createSuccessStory(story: InsertSuccessStory): Promise<SuccessStory> {
+    this.checkDb();
     try {
-      // First, update the missing person's status to "found"
-      await db
+      await this.db!
         .update(missingPersons)
-        .set({ 
-          status: "found", 
-          updatedAt: new Date() 
+        .set({
+          status: "found",
+          updatedAt: new Date()
         })
         .where(eq(missingPersons.id, story.missingPersonId));
 
-      // Then create the success story
-      const result = await db.insert(successStories).values(story).returning();
+      const result = await this.db!.insert(successStories).values(story).returning();
       return result[0];
     } catch (error) {
       console.error("Error creating success story:", error);
@@ -211,43 +225,38 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getStatistics(): Promise<Statistics> {
+    this.checkDb();
     try {
-      // Count total missing persons
-      const totalResult = await db
+      const totalResult = await this.db!
         .select({ value: count() })
         .from(missingPersons);
       const totalCount = totalResult[0]?.value || 0;
-      
-      // Count found persons
-      const foundResult = await db
+
+      const foundResult = await this.db!
         .select({ value: count() })
         .from(missingPersons)
         .where(eq(missingPersons.status, "found"));
       const foundCount = foundResult[0]?.value || 0;
-      
-      // Get the date for one month ago
+
       const now = new Date();
       const oneMonthAgo = new Date(now);
       oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-      
-      // Get the date for one year ago
+
       const oneYearAgo = new Date(now);
       oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-      
-      // Count monthly new cases
-      const monthlyResult = await db
+
+      const monthlyResult = await this.db!
         .select({ value: count() })
         .from(missingPersons)
         .where(gte(missingPersons.createdAt, oneMonthAgo));
       const monthlyCount = monthlyResult[0]?.value || 0;
-      
-      // Count yearly new cases
-      const yearlyResult = await db
+
+      const yearlyResult = await this.db!
         .select({ value: count() })
         .from(missingPersons)
         .where(gte(missingPersons.createdAt, oneYearAgo));
       const yearlyCount = yearlyResult[0]?.value || 0;
-      
+
       return {
         totalMissingPersons: Number(totalCount),
         foundPersons: Number(foundCount),
@@ -266,4 +275,5 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
+// exporte uma instância mas lembre-se de chamar init antes de usar
 export const storage = new DatabaseStorage();
